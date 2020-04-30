@@ -3,6 +3,7 @@ package com.py7hon.scanner.normal;
 import com.py7hon.properties.ScannerProperties;
 import com.py7hon.scanner.BaseScanner;
 import com.py7hon.scanner.IScanner;
+import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -16,10 +17,7 @@ import java.util.concurrent.*;
  */
 public class NormalScanner extends BaseScanner implements IScanner {
 
-    private static final Integer[] PORTS = new Integer[]{21, 22, 23, 25, 26, 53, 69, 80, 110, 143,
-            443, 465, 69, 161, 162, 135, 995, 1080, 1158, 1433, 1521, 2100, 3128, 3306, 3389,
-            7001, 8080, 8081, 9080, 9090, 43958, 135, 445, 1025, 1026, 1027, 1028, 1055, 5357};
-    Queue<Integer> queue = new LinkedList<Integer>(Arrays.asList(PORTS));
+    Queue<Integer> queue = new LinkedList<Integer>();
 
     /**
      * 已开启的端口
@@ -28,33 +26,46 @@ public class NormalScanner extends BaseScanner implements IScanner {
 
     public NormalScanner(ScannerProperties properties) {
         this.properties = properties;
-        // 如果是范围扫描
+        // 如果是扫描一定范围的
         if (this.properties.isScanRangePort()) {
             this.currentPort = this.properties.getStartPort();
             this.totalPortNum = this.properties.getEndPort() - this.properties.getStartPort() + 1;
         } else {
-            // 如果是常规扫描
-            this.totalPortNum = NormalScanner.PORTS.length;
+            // 如果扫描的是不特定范围的
+            for (int port : properties.getPorts()) {
+                queue.add(port);
+            }
+            this.totalPortNum = queue.size();
         }
     }
 
     @Override
     public void scan() {
-        ExecutorService pool = new ThreadPoolExecutor(1, properties.getThreadNumber(),
+
+        ExecutorService pool = new ThreadPoolExecutor(properties.getThreadNumber(), properties.getThreadNumber(),
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(1024),
-                Executors.defaultThreadFactory(),
+                new MyThreadFactory(),
                 new ThreadPoolExecutor.AbortPolicy());
 
         //线程池
-        for (int i = 0; i < properties.getThreadNumber(); i++) {
-            pool.execute(new NormalScanTask(this));
+        int threadNumber = properties.getThreadNumber();
+        for (int i = 0; i < threadNumber; i++) {
+            pool.submit(new NormalScanTask(this));
+            System.out.printf("\r正在创建线程...(%d/%d)", i + 1, threadNumber);
         }
+        System.out.println();
+
         pool.shutdown();
 
         while (true) {
             if (pool.isTerminated()) {
-                System.out.println("扫描结束");
+                System.out.println("\n\n扫描结束");
+                System.out.println("开放的端口：");
+                int length = openedPorts.size();
+                for (int i = 0; i < length; i++) {
+                    System.out.printf("(%d)\t%5d\n", i + 1, openedPorts.get(i));
+                }
                 break;
             }
             try {

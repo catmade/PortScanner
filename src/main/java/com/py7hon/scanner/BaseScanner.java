@@ -43,6 +43,10 @@ public abstract class BaseScanner {
         return currentPort;
     }
 
+    public void setCurrentPort(int currentPort) {
+        this.currentPort = currentPort;
+    }
+
     public ScannerProperties getProperties() {
         return properties;
     }

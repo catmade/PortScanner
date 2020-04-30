@@ -1,8 +1,7 @@
 package com.py7hon.properties;
 
-import com.sun.istack.internal.NotNull;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.net.InetAddress;
 
@@ -13,13 +12,12 @@ import java.net.InetAddress;
  * @version 1.0
  * @date 2020/4/24 10:14
  */
-@Builder
 @Data
+@NoArgsConstructor
 public class ScannerProperties {
     /**
      * 目标。IP 地址或域名
      */
-    @NotNull
     private InetAddress target;
 
     /**
@@ -30,7 +28,7 @@ public class ScannerProperties {
     /**
      * 线程数
      */
-    private int threadNumber = 10;
+    private int threadNumber = 20;
 
     /**
      * 是否扫描一定范围内的端口
@@ -46,6 +44,13 @@ public class ScannerProperties {
      * 结束端口
      */
     private int endPort = 65535;
+
+    /**
+     * 常用端口
+     */
+    private int[] ports = new int[]{21, 22, 23, 25, 26, 53, 69, 80, 110, 143,
+            443, 465, 69, 161, 162, 135, 995, 1080, 1158, 1433, 1521, 2100, 3128, 3306, 3389,
+            7001, 8080, 8081, 9080, 9090, 43958, 135, 445, 1025, 1026, 1027, 1028, 1055, 5357};
 
     /**
      * 是否输出所有扫描过程

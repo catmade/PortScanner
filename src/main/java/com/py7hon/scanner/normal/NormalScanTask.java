@@ -1,5 +1,7 @@
 package com.py7hon.scanner.normal;
 
+import lombok.SneakyThrows;
+
 import java.io.IOException;
 import java.net.*;
 
@@ -58,6 +60,13 @@ class NormalScanTask implements Runnable {
 
     @Override
     public void run() {
+        // 执行前先等一下，等大概所有线程都创建了再运行
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         if (scanner.getProperties().isScanRangePort()) {
             this.scanRange();
         } else {
@@ -83,8 +92,9 @@ class NormalScanTask implements Runnable {
 
                 int scannedPortNum = scanner.getScannedPortNum();
                 scannedPortNum++;
-                progress = String.format("(%d/%d)", scannedPortNum, scanner.getTotalPortNum());
+                setProgress(String.format("(%d/%d)", scannedPortNum, scanner.getTotalPortNum()));
 
+                scanner.setCurrentPort(port + 1);
                 scanner.setScannedPortNum(scannedPortNum);
             }
 
@@ -101,7 +111,7 @@ class NormalScanTask implements Runnable {
         while (true) {
 
             // 获取端口
-            synchronized (NormalScanTask.class) {
+            synchronized (scanner) {
                 if (scanner.queue.size() == 0) {
                     return;
                 }
@@ -109,12 +119,19 @@ class NormalScanTask implements Runnable {
 
                 int scannedPortNum = scanner.getScannedPortNum();
                 scannedPortNum++;
-                progress = String.format("(%d/%d)", scannedPortNum, scanner.getTotalPortNum());
+                setProgress(String.format("(%d/%d)", scannedPortNum, scanner.getTotalPortNum()));
 
                 scanner.setScannedPortNum(scannedPortNum);
             }
 
             scan(port);
+        }
+    }
+
+    private void setProgress(String progress) {
+        this.progress = progress;
+        if (!printProcess) {
+            System.out.print("\r线程全部开启，正在扫描..." + progress);
         }
     }
 
@@ -130,9 +147,9 @@ class NormalScanTask implements Runnable {
         try {
             // 对目标主机的指定端口进行连接，超时后连接失败
             socket.connect(socketAddress, timeout);
-
             // 关闭端口
             socket.close();
+            scanner.openedPorts.add(port);
             this.print(port, true);
         } catch (IOException e) {
             this.print(port, false);
@@ -152,9 +169,9 @@ class NormalScanTask implements Runnable {
         }
 
         if (opened) {
-            System.out.printf("port: %5d opened. %s. thread:%s\n", port, progress, Thread.currentThread().getName());
+            System.out.printf("port: %5d opened. %s. [%s]\n", port, progress, Thread.currentThread().getName());
         } else {
-            System.err.printf("port: %5d closed. %s. thread:%s\n", port, progress, Thread.currentThread().getName());
+            System.err.printf("port: %5d closed. %s. [%s]\n", port, progress, Thread.currentThread().getName());
         }
     }
 }
