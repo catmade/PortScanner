@@ -1,4 +1,4 @@
-package com.py7hon.scanner.normal;
+package com.py7hon.scanner;
 
 import java.util.concurrent.ThreadFactory;
 

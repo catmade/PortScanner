@@ -1,18 +1,17 @@
-package com.py7hon.scanner.normal;
+package com.py7hon.scanner.base;
 
-import lombok.SneakyThrows;
+import com.py7hon.scanner.PortScanner;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
 
 /**
- * 普通扫描任务
+ * 扫描任务
  *
  * @author Seven
  * @version 1.0
- * @date 2020/4/24 10:06
+ * @date 2020/4/30 14:36
  */
-class NormalScanTask implements Runnable {
+public abstract class BaseScanTask implements Runnable {
 
     /**
      * 开始端口
@@ -27,12 +26,12 @@ class NormalScanTask implements Runnable {
     /**
      * 扫描器
      */
-    private final NormalScanner scanner;
+    protected final PortScanner scanner;
 
     /**
      * 连接超时时间，单位毫秒
      */
-    private final int timeout;
+    protected final int timeout;
 
     /**
      * 是否显示每个端口的扫描过程
@@ -42,15 +41,15 @@ class NormalScanTask implements Runnable {
     /**
      * 主机地址
      */
-    private final InetAddress inetAddress;
+    protected final InetAddress inetAddress;
 
     /**
      * 当前计算任务的进度
      */
     private String progress;
 
-    public NormalScanTask(NormalScanner normalScanner) {
-        this.scanner = normalScanner;
+    public BaseScanTask(PortScanner scanner) {
+        this.scanner = scanner;
         this.timeout = scanner.getProperties().getTimeOut();
         this.startPort = scanner.getProperties().getStartPort();
         this.endPort = scanner.getProperties().getEndPort();
@@ -83,7 +82,7 @@ class NormalScanTask implements Runnable {
             int port;
 
             // 获取端口
-            synchronized (NormalScanTask.class) {
+            synchronized (scanner) {
                 port = scanner.getCurrentPort();
                 boolean outOfRange = (port > endPort || port < startPort);
                 if (outOfRange) {
@@ -112,10 +111,10 @@ class NormalScanTask implements Runnable {
 
             // 获取端口
             synchronized (scanner) {
-                if (scanner.queue.size() == 0) {
+                if (scanner.getQueue().size() == 0) {
                     return;
                 }
-                port = scanner.queue.remove();
+                port = scanner.queueRemoveFirst();
 
                 int scannedPortNum = scanner.getScannedPortNum();
                 scannedPortNum++;
@@ -140,21 +139,7 @@ class NormalScanTask implements Runnable {
      *
      * @param port 端口
      */
-    private void scan(int port) {
-        // 套接字
-        Socket socket = new Socket();
-        SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
-        try {
-            // 对目标主机的指定端口进行连接，超时后连接失败
-            socket.connect(socketAddress, timeout);
-            // 关闭端口
-            socket.close();
-            scanner.openedPorts.add(port);
-            this.print(port, true);
-        } catch (IOException e) {
-            this.print(port, false);
-        }
-    }
+    protected abstract void scan(int port);
 
     /**
      * 输出扫描结果
@@ -162,7 +147,7 @@ class NormalScanTask implements Runnable {
      * @param port   端口
      * @param opened 是否开发
      */
-    private void print(int port, boolean opened) {
+    protected void print(int port, boolean opened) {
         // 如果不打印
         if (!printProcess) {
             return;

@@ -56,4 +56,9 @@ public class ScannerProperties {
      * 是否输出所有扫描过程
      */
     private boolean printProcess = true;
+
+    /**
+     * 扫描方式
+     */
+    private int type = 1;
 }

@@ -1,21 +1,48 @@
-package com.py7hon.scanner.normal;
+package com.py7hon.scanner;
 
 import com.py7hon.properties.ScannerProperties;
-import com.py7hon.scanner.BaseScanner;
-import com.py7hon.scanner.IScanner;
-import jdk.nashorn.internal.runtime.UnwarrantedOptimismException;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 普通的扫描方式
- *
  * @author Seven
  * @version 1.0
- * @date 2020/4/24 10:06
+ * @date 2020/4/24 10:18
  */
-public class NormalScanner extends BaseScanner implements IScanner {
+public class PortScanner {
+    /**
+     * 主程序的版本
+     */
+    private static final String MAIN_VERSION = "1.0";
+
+    /**
+     * 全扫描方式版本
+     */
+    private static final String FULL_SCAN_VERSION = "1.0";
+
+    /**
+     * 扫描的配置
+     */
+    protected ScannerProperties properties;
+
+    /**
+     * 当前的端口号
+     */
+    protected int currentPort;
+
+    /**
+     * 总共要扫描的端口号
+     */
+    protected int totalPortNum;
+
+    /**
+     * 已扫描的端口号
+     */
+    protected int scannedPortNum = 0;
 
     Queue<Integer> queue = new LinkedList<Integer>();
 
@@ -24,7 +51,7 @@ public class NormalScanner extends BaseScanner implements IScanner {
      */
     List<Integer> openedPorts = new ArrayList<Integer>();
 
-    public NormalScanner(ScannerProperties properties) {
+    public PortScanner(ScannerProperties properties) {
         this.properties = properties;
         // 如果是扫描一定范围的
         if (this.properties.isScanRangePort()) {
@@ -39,8 +66,17 @@ public class NormalScanner extends BaseScanner implements IScanner {
         }
     }
 
-    @Override
+    /**
+     * 打印程序信息
+     */
+    public static void printHelloMsg() {
+        System.out.println("主程序版本：" + MAIN_VERSION);
+        System.out.println("全扫描程序版本：" + FULL_SCAN_VERSION);
+    }
+
     public void scan() {
+
+        printHelloMsg();
 
         ExecutorService pool = new ThreadPoolExecutor(properties.getThreadNumber(), properties.getThreadNumber(),
                 0L, TimeUnit.MILLISECONDS,
@@ -51,7 +87,7 @@ public class NormalScanner extends BaseScanner implements IScanner {
         //线程池
         int threadNumber = properties.getThreadNumber();
         for (int i = 0; i < threadNumber; i++) {
-            pool.submit(new NormalScanTask(this));
+            pool.submit(Objects.requireNonNull(ScanTaskFactory.createTask(this)));
             System.out.printf("\r正在创建线程...(%d/%d)", i + 1, threadNumber);
         }
         System.out.println();
@@ -75,19 +111,41 @@ public class NormalScanner extends BaseScanner implements IScanner {
             }
         }
     }
+
+    public Queue<Integer> getQueue() {
+        return queue;
+    }
+
+    /**
+     * 出队
+     *
+     * @return 出队的值
+     */
+    public Integer queueRemoveFirst() {
+        return queue.remove();
+    }
+
+    public int getCurrentPort() {
+        return currentPort;
+    }
+
+    public void setCurrentPort(int currentPort) {
+        this.currentPort = currentPort;
+    }
+
+    public ScannerProperties getProperties() {
+        return properties;
+    }
+
+    public int getTotalPortNum() {
+        return totalPortNum;
+    }
+
+    public int getScannedPortNum() {
+        return scannedPortNum;
+    }
+
+    public void setScannedPortNum(int scannedPortNum) {
+        this.scannedPortNum = scannedPortNum;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

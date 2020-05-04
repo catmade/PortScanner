@@ -1,7 +1,7 @@
 package com.py7hon;
 
 import com.py7hon.properties.ScannerProperties;
-import com.py7hon.scanner.normal.NormalScanner;
+import com.py7hon.scanner.PortScanner;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -17,16 +17,13 @@ import java.util.Scanner;
 public class ScannerApplication {
 
     /**
-     * 主程序的版本
-     */
-    private static final String VERSION = "1.0";
-
-    /**
      * 获取控制台输入
      */
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) {
+        PortScanner.printHelloMsg();
+
         ScannerProperties properties = new ScannerProperties();
 
         setTarget(properties);
@@ -35,7 +32,7 @@ public class ScannerApplication {
         setScanPort(properties);
         setPrintStyle(properties);
 
-        new NormalScanner(properties).scan();
+        new PortScanner(properties).scan();
     }
 
     /**

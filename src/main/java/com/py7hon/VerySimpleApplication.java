@@ -2,7 +2,6 @@ package com.py7hon;
 
 import java.io.IOException;
 import java.net.*;
-import java.text.ParseException;
 import java.util.Arrays;
 
 /**
@@ -14,6 +13,10 @@ import java.util.Arrays;
  */
 public class VerySimpleApplication {
     public static void main(String[] args) {
+        if (args == null || args.length < 2) {
+            printHelp();
+        }
+
         String target = args[0];
         InetAddress inetAddress = null;
         try {
@@ -36,7 +39,7 @@ public class VerySimpleApplication {
         try {
             Socket socket = new Socket();
             InetSocketAddress inetSocketAddress = new InetSocketAddress(inetAddress, port);
-            socket.connect(inetSocketAddress, 3000);
+            socket.connect(inetSocketAddress, 1000);
             socket.close();
             System.out.printf("%s:%5d is opened\n", inetAddress, port);
         } catch (IOException e) {
@@ -44,5 +47,11 @@ public class VerySimpleApplication {
         } catch (IllegalArgumentException e) {
             System.err.printf("错误的端口号：“%d”", port);
         }
+    }
+
+    private static void printHelp() {
+        System.out.println("usage: name [target] [port1 port2 ...]\n" +
+                "example: \n" +
+                "\tname www.domain.com 22 80 8080 3306");
     }
 }
