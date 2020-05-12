@@ -17,12 +17,12 @@ public class PortScanner {
     /**
      * 主程序的版本
      */
-    private static final String MAIN_VERSION = "1.0";
+    private static final String MAIN_VERSION = "1.1";
 
     /**
      * 全扫描方式版本
      */
-    private static final String FULL_SCAN_VERSION = "1.0";
+    private static final String FULL_SCAN_VERSION = "1.1";
 
     /**
      * 扫描的配置
@@ -30,26 +30,26 @@ public class PortScanner {
     protected ScannerProperties properties;
 
     /**
-     * 当前的端口号
+     * 当前正在被扫描的端口号
      */
     protected int currentPort;
 
     /**
-     * 总共要扫描的端口号
+     * 总共要扫描的端口号数目
      */
     protected int totalPortNum;
 
     /**
-     * 已扫描的端口号
+     * 已扫描的端口号数目
      */
     protected int scannedPortNum = 0;
 
-    Queue<Integer> queue = new LinkedList<Integer>();
+    Queue<Integer> queue = new LinkedList<>();
 
     /**
      * 已开启的端口
      */
-    List<Integer> openedPorts = new ArrayList<Integer>();
+    List<Integer> openedPorts = new ArrayList<>();
 
     public PortScanner(ScannerProperties properties) {
         this.properties = properties;
@@ -75,9 +75,6 @@ public class PortScanner {
     }
 
     public void scan() {
-
-        printHelloMsg();
-
         ExecutorService pool = new ThreadPoolExecutor(properties.getThreadNumber(), properties.getThreadNumber(),
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(1024),

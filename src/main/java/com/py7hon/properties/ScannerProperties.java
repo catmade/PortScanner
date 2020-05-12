@@ -23,12 +23,12 @@ public class ScannerProperties {
     /**
      * 连接超时，单位：毫秒
      */
-    private int timeOut = 3000;
+    private int timeOut = 2000;
 
     /**
      * 线程数
      */
-    private int threadNumber = 20;
+    private int threadNumber = 5;
 
     /**
      * 是否扫描一定范围内的端口

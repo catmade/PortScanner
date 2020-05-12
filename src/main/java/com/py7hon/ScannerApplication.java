@@ -27,9 +27,9 @@ public class ScannerApplication {
         ScannerProperties properties = new ScannerProperties();
 
         setTarget(properties);
-        setTimeOut(properties);
-        setThreadNumber(properties);
         setScanPort(properties);
+        setThreadNumber(properties);
+        setTimeOut(properties);
         setPrintStyle(properties);
 
         new PortScanner(properties).scan();
@@ -73,6 +73,9 @@ public class ScannerApplication {
         }
     }
 
+    /**
+     * 设置扫描端口
+     */
     private static void setScanPort(ScannerProperties properties) {
         System.out.println("1) 0-65535\t2) 常用端口\t3) 指定端口\t4)指定范围");
         System.out.print("请根据上诉选项选择端口扫描范围[2]：");

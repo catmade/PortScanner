@@ -22,14 +22,10 @@ public class FullScannerTask extends BaseScanTask {
 
     @Override
     protected void scan(int port) {
-        // 套接字
-        Socket socket = new Socket();
-        SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
-        try {
+        try (Socket socket = new Socket()) {
+            SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
             // 对目标主机的指定端口进行连接，超时后连接失败
             socket.connect(socketAddress, timeout);
-            // 关闭端口
-            socket.close();
             scanner.openedPorts.add(port);
             this.print(port, true);
         } catch (IOException e) {
